@@ -1,8 +1,11 @@
 from playwright.sync_api import Playwright, sync_playwright, expect
-from pom.homepage_elements import Homepage
-from pom.homepage_overlay_elements import HomepageOverlay
+from pom.homepage_main import Homepage
+from pom.homepage_overlay import HomepageOverlay
+from pom.user_portal_login_page import UserPortalLoginPage
+import pytest
 
 
+# When using pytest, we can rename the function by adding test_ at the beginning
 def run(playwright: Playwright) -> None:
     browser = playwright.chromium.launch(headless=False, slow_mo=500)
     context = browser.new_context()
@@ -44,11 +47,14 @@ def run(playwright: Playwright) -> None:
     with page.expect_popup() as page2_info:
         page.get_by_role("link", name="Log In").click()
     page2 = page2_info.value
-    page2.get_by_placeholder("john.doe@gmail.com").click()
-    page2.get_by_placeholder("john.doe@gmail.com").fill("tito+mob01@expatrio.com", timeout=3000)
-    page2.get_by_placeholder("john.doe@gmail.com").press("Tab")
-    page2.get_by_label("Password", exact=True).fill("Bobon@mob01")
-    page2.get_by_role("button", name="Login", exact=True).click()
+    # page2.get_by_placeholder("john.doe@gmail.com").click()
+    # page2.get_by_placeholder("john.doe@gmail.com").fill("tito+mob01@expatrio.com", timeout=3000)
+    # page2.get_by_placeholder("john.doe@gmail.com").press("Tab")
+    # page2.get_by_label("Password", exact=True).fill("Bobon@mob01")
+    # page2.get_by_role("button", name="Login", exact=True).click()
+    # Using POM
+    user_portal_login = UserPortalLoginPage(page=page2)
+    user_portal_login.submit_login("tito+mob01@expatrio.com", "Bobon@mob01")
 
     # UP page
     # Adding waiting using while loop
@@ -94,5 +100,12 @@ def run(playwright: Playwright) -> None:
     browser.close()
 
 
-with sync_playwright() as playwright:
-    run(playwright)
+# If we want to run a test using pytest from this file
+# We can remove the block of codes below to the bottom
+def run_login_to_user_portal():
+    with sync_playwright() as playwright:
+        run(playwright)
+
+
+if __name__ == '__main__':
+    run_login_to_user_portal()
